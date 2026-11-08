@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Хеллоуин за столом</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Nunito:wght@400;600;700;800&display=swap">
+    <style>
+        html,body{margin:0}
+        :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+        [hidden]{display:none!important}
+        /* Layout : une page de cahier russe (тетрадь в клетку) — onglets = étapes du devoir, accent citrouille + prune pour Halloween */
+        :root{
+            --paper:#F4F3F8; --grid:rgba(91,58,140,.07); --card:#FFFFFF; --ink:#22203A; --muted:#625E7A;
+            --line:#DEDBE8; --accent:#C9571A; --accent-soft:#FBEADF; --plum:#5B3A8C; --plum-soft:#EEE8F7; --margin:#D2453A;
+            --ok:#23804F; --ok-bg:#E3F4EA; --bad:#C0392B; --bad-bg:#FBE7E4;
+            --f-display:"Playfair Display", Georgia, "Times New Roman", serif;
+            --f-body:"Nunito", "Segoe UI", system-ui, sans-serif;
+        }
+        @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+            --paper:#15131F; --grid:rgba(190,160,255,.05); --card:#1E1B2C; --ink:#ECE9F5; --muted:#A39FB9;
+            --line:#332F47; --accent:#FF9A5C; --accent-soft:#3A2619; --plum:#C2A6F2; --plum-soft:#2A2340; --margin:#FF7A6E;
+            --ok:#5CCB8E; --ok-bg:#163126; --bad:#FF8A7E; --bad-bg:#3A1E1D; color-scheme:dark; } }
+        :root[data-theme="dark"]{
+            --paper:#15131F; --grid:rgba(190,160,255,.05); --card:#1E1B2C; --ink:#ECE9F5; --muted:#A39FB9;
+            --line:#332F47; --accent:#FF9A5C; --accent-soft:#3A2619; --plum:#C2A6F2; --plum-soft:#2A2340; --margin:#FF7A6E;
+            --ok:#5CCB8E; --ok-bg:#163126; --bad:#FF8A7E; --bad-bg:#3A1E1D; color-scheme:dark; }
+
+        *{box-sizing:border-box}
+        body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+            background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+        .wrap{max-width:820px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:26px 56px}
+        header h1{font-family:var(--f-display);font-weight:700;font-size:clamp(2rem,6vw,2.8rem);line-height:1.08;margin:0;text-wrap:balance}
+        header h1 i{color:var(--accent);font-style:italic}
+        header p{margin:6px 0 0;color:var(--muted);font-weight:600}
+
+        nav{display:flex;flex-wrap:wrap;gap:6px;margin:20px 0 14px}
+        nav a{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--ink);font-weight:800;font-size:.95rem;
+            padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--card)}
+        nav a span{color:var(--muted);font-weight:700;font-size:.8rem}
+        nav a[aria-current="page"]{background:var(--plum);border-color:var(--plum);color:var(--card)}
+        nav a[aria-current="page"] span{color:var(--card);opacity:.8}
+
+        .sheet{position:relative;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:22px 20px 26px}
+        @media (min-width:640px){.sheet{padding-left:64px}.sheet::before{content:"";position:absolute;top:0;bottom:0;left:44px;width:2px;background:var(--margin);opacity:.5}}
+        h2{font-family:var(--f-display);font-size:1.45rem;margin:0 0 4px;text-wrap:balance}
+        h3{font-family:var(--f-display);font-size:1.15rem;margin:26px 0 8px;color:var(--plum)}
+        .task{color:var(--muted);font-size:.93rem;margin:0 0 14px}
+        .label{font-size:.74rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+        .btn{appearance:none;font:inherit;font-weight:800;font-size:1rem;border:0;border-radius:10px;padding:11px 20px;cursor:pointer;background:var(--accent);color:var(--card)}
+        .btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+        .btn.plum{background:var(--plum)}
+        .btn:disabled{opacity:.45;cursor:not-allowed}
+        .link{appearance:none;background:none;border:0;color:var(--plum);font:inherit;font-size:.9rem;font-weight:800;cursor:pointer;padding:4px;text-decoration:underline;text-underline-offset:3px}
+        button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--plum);outline-offset:2px}
+        .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+        /* Lecture */
+        .story h3{margin-top:4px;font-size:1.35rem;color:var(--ink)}
+        .story p{font-size:1.12rem;line-height:1.75;margin:0 0 14px;max-width:62ch;text-indent:1.4em}
+        .w{border:0;background:none;font:inherit;color:inherit;padding:0;cursor:pointer;border-bottom:2px dotted var(--accent);line-height:1.2}
+        .w:hover,.w.on{background:var(--accent-soft)}
+        .gloss{position:absolute;z-index:5;max-width:min(300px,calc(100vw - 32px));background:var(--ink);color:var(--card);border-radius:8px;padding:8px 12px;font-size:.92rem;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+        .gloss b{display:block;font-size:1rem}
+        .say{appearance:none;border:1.5px solid var(--line);background:var(--card);color:var(--plum);border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font:inherit;font-weight:800;font-size:.85rem;padding:6px 12px}
+        .say svg{width:16px;height:16px}
+        .say.round{width:38px;height:38px;padding:0;justify-content:center;flex:none}
+
+        /* QCM */
+        .q{border-top:1px solid var(--line);padding:16px 0 4px}
+        .q .stem{font-weight:800;font-size:1.08rem;margin-bottom:10px}
+        .opts{display:grid;grid-template-columns:1fr;gap:8px}
+        @media (min-width:600px){.opts{grid-template-columns:1fr 1fr}}
+        .opt{appearance:none;text-align:left;font:inherit;font-size:1rem;font-weight:700;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;min-width:0;overflow-wrap:anywhere}
+        .opt:hover:not(:disabled){border-color:var(--plum)}
+        .opt.ok{border-color:var(--ok);background:var(--ok-bg)} .opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+        .opt:disabled{cursor:default}
+        .fb{margin-top:10px;border-radius:10px;padding:10px 14px;display:grid;gap:4px;font-size:.93rem}
+        .fb.ok{background:var(--ok-bg)} .fb.bad{background:var(--bad-bg)}
+        .fb .v{font-weight:800} .fb.ok .v{color:var(--ok)} .fb.bad .v{color:var(--bad)}
+        .fb .en{color:var(--muted);border-top:1px dashed var(--line);padding-top:4px}
+        .scorebar{margin-top:18px;font-weight:800;color:var(--plum)}
+
+        /* Entraînement à l'écriture */
+        .chips{display:flex;flex-wrap:wrap;gap:6px}
+        .chip{appearance:none;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.9rem;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer}
+        .chip[aria-pressed="true"]{border-color:var(--plum);background:var(--plum-soft);color:var(--plum)}
+        .setup{display:grid;gap:14px;margin-bottom:6px}
+        .setup > div{display:grid;gap:6px}
+        .trainer{border:1.5px solid var(--line);border-radius:12px;padding:16px;margin-top:16px;display:grid;gap:12px}
+        .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:800;font-variant-numeric:tabular-nums}
+        .top .g{color:var(--ok)} .top .b{color:var(--bad)}
+        .bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+        .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+        .prompt{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+        .prompt .fr{font-size:clamp(1.3rem,4.5vw,1.75rem);font-weight:800;overflow-wrap:anywhere;min-width:0}
+        .tag{font-size:.78rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
+        input.type{font:inherit;font-size:1.3rem;font-weight:700;padding:11px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);width:100%;min-width:0}
+        input.type.ok{border-color:var(--ok);background:var(--ok-bg)} input.type.bad{border-color:var(--bad);background:var(--bad-bg)}
+        .diff{font-size:1.25rem;font-weight:800;letter-spacing:.03em}
+        .diff .x{color:var(--bad);text-decoration:underline wavy;text-underline-offset:4px}
+        .diff .m{color:var(--bad);opacity:.6}
+        .answer{font-size:1.2rem;font-weight:800}
+        .answer small{display:block;font-size:.85rem;color:var(--muted);font-weight:600}
+        .done{display:grid;gap:10px}
+        .done .big{font-family:var(--f-display);font-size:3rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+        .errs{list-style:none;padding:0;margin:0;border-top:1px solid var(--line)}
+        .errs li{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}
+        .errs li b{font-size:1.05rem}
+        .errs li span{color:var(--muted)}
+
+        /* Curiosités */
+        .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+        .card{appearance:none;font:inherit;color:var(--ink);text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:12px 14px;cursor:pointer;min-height:96px;display:grid;align-content:start;gap:4px}
+        .card b{font-size:1.06rem}
+        .card .back{color:var(--muted);font-size:.92rem}
+        .card[aria-expanded="false"] .back{display:none}
+        .card[aria-expanded="false"]::after{content:"Toucher pour voir le sens";font-size:.78rem;color:var(--plum);font-weight:700}
+        .card.fear{border-left:4px solid var(--plum)} .card.food{border-left:4px solid var(--accent)}
+        @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+    </style>
+</head>
+<body>
+
+<div class="wrap">
+    <header>
+        <h1>Хеллоуин <i>за столом</i></h1>
+        <p>Devoir interactif · lecture, écriture, traduction</p>
+    </header>
+
+    <nav id="nav">
+        <a href="#lecture" data-v="lecture">1 · Читаем <span>Lecture</span></a>
+        <a href="#mots" data-v="mots">2 · Пишем слова <span>Écrire</span></a>
+        <a href="#phrases" data-v="phrases">3 · Переводим <span>Traduire</span></a>
+        <a href="#curiosites" data-v="curiosites">4 · Интересное <span>Curiosités</span></a>
+    </nav>
+
+    <!-- 1 · LECTURE -->
+    <section class="sheet" id="v-lecture">
+        <h2>Читаем текст</h2>
+        <p class="task">Lisez le texte. Touchez un mot souligné pour voir sa traduction.</p>
+        <div class="story" id="story"></div>
+        <h3>Вопросы к тексту</h3>
+        <p class="task">Choisissez la bonne réponse.</p>
+        <div id="comp"></div>
+        <div class="scorebar" id="compScore"></div>
+        <div class="row" style="margin-top:18px"><a class="btn plum" href="#mots" style="text-decoration:none">Étape suivante : écrire les mots →</a></div>
+    </section>
+
+    <!-- 2 · MOTS -->
+    <section class="sheet" id="v-mots" hidden>
+        <h2>Пишем слова</h2>
+        <p class="task">Écrivez le mot en russe avec votre clavier russe. Le « ё » peut s'écrire « е ».</p>
+        <div class="setup" id="wSetup">
+            <div><span class="label">Thème</span><div class="chips" id="wTheme"></div></div>
+            <div><span class="label">Nombre de mots</span><div class="chips" id="wCount"></div></div>
+            <div class="row"><button class="btn" id="wStart">Commencer</button></div>
+        </div>
+        <div class="trainer" id="wTrainer" hidden>
+            <div class="top"><span id="wPos"></span><span><span class="g" id="wG"></span> · <span class="b" id="wB"></span></span><button class="link" id="wQuit">Arrêter</button></div>
+            <div class="bar"><i id="wBar"></i></div>
+            <div class="tag" id="wTag"></div>
+            <div class="prompt"><div class="fr" id="wFr"></div></div>
+            <input class="type" id="wIn" autocomplete="off" autocapitalize="off" spellcheck="false" lang="ru" aria-label="Votre réponse en russe">
+            <div id="wFb"></div>
+            <div class="row">
+                <button class="btn" id="wCheck">Vérifier</button>
+                <button class="btn ghost" id="wHint">Indice : une lettre</button>
+                <button class="link" id="wSkip">Je ne sais pas</button>
+                <button class="btn plum" id="wNext" hidden>Suivant ↵</button>
+            </div>
+        </div>
+        <div class="trainer done" id="wDone" hidden></div>
+    </section>
+
+    <!-- 3 · PHRASES -->
+    <section class="sheet" id="v-phrases" hidden>
+        <h2>Переводим фразы</h2>
+        <p class="task">Traduisez la phrase en russe. Toutes les phrases utilisent les mots du texte. Si votre version est différente du modèle, comparez et décidez honnêtement : juste ou à revoir.</p>
+        <div class="trainer" id="pTrainer">
+            <div class="top"><span id="pPos"></span><span><span class="g" id="pG"></span> · <span class="b" id="pB"></span></span><button class="link" id="pRestart">Recommencer</button></div>
+            <div class="bar"><i id="pBar"></i></div>
+            <div class="prompt"><div class="fr" id="pFr"></div></div>
+            <input class="type" id="pIn" autocomplete="off" autocapitalize="off" spellcheck="false" lang="ru" aria-label="Votre traduction en russe">
+            <div id="pFb"></div>
+            <div class="row">
+                <button class="btn" id="pCheck">Vérifier</button>
+                <button class="link" id="pSkip">Voir la réponse</button>
+                <button class="btn" id="pRight" hidden style="background:var(--ok)">J'avais bon</button>
+                <button class="btn" id="pWrong" hidden style="background:var(--bad)">À revoir</button>
+                <button class="btn plum" id="pNext" hidden>Suivant ↵</button>
+            </div>
+        </div>
+        <div class="trainer done" id="pDone" hidden></div>
+    </section>
+
+    <!-- 4 · CURIOSITÉS -->
+    <section class="sheet" id="v-curiosites" hidden>
+        <h2>Интересное</h2>
+        <p class="task">Des expressions sur la peur et sur la nourriture.</p>
+
+        <h3>Когда страшно… · Quand on a peur</h3>
+        <div class="cards" id="cFear"></div>
+
+        <h3>Еда в языке · La nourriture dans la langue</h3>
+        <div class="cards" id="cFood"></div>
+
+        <h3>Какое выражение подходит?</h3>
+        <p class="task">Choisissez l'expression qui convient.</p>
+        <div id="idq"></div>
+
+    </section>
+</div>
+
+<script>
+    "use strict";
+    function $(id){ return document.getElementById(id); }
+    function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+    function shuffle(a){ a = a.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+    // ---------- Texte ----------
+    // [[forme du texte|forme de base (vide = identique)|traduction]]
+    var TEXT = [
+        "Месяц назад Лиза и Максим [[переехали|переехать|déménager]] в новую [[двушку|двушка|appartement 2 pièces (fam.)]]. В субботу, тридцать первого октября, они решили отметить [[новоселье||pendaison de crémaillère]] и [[Хеллоуин||Halloween]] и [[пригласили|пригласить|inviter]] друзей на [[ужин||dîner]]. Лиза очень любит [[готовить||cuisiner]], поэтому она придумала «страшное [[меню||menu]]».",
+        "Утром ребята пошли на [[фермерский рынок||marché fermier]]. Там они купили огромную [[тыкву|тыква|citrouille]], [[свёклу|свёкла|betterave]], [[капусту|капуста|chou]], [[картошку|картошка|pommes de terre]], свежий [[творог||fromage blanc, caillé]] и [[клюкву|клюква|canneberge (cranberry)]]. «От фермы к столу!» — засмеялся Максим.",
+        "Весь день ребята готовили. [[На первое||en premier plat (souvent la soupe)]] Лиза [[сварила|сварить|faire cuire (perfectif)]] тыквенный [[суп||soupe]] — густой, оранжевый и очень [[ароматный||parfumé]]. Потом она приготовила [[винегрет||salade russe à la betterave]]: салат получился тёмно-красный, как [[кровь||sang]]. Максим [[испёк|испечь|cuire au four (perfectif)]] [[пирожки с капустой|пирожок с капустой|petits chaussons au chou]] и сделал «пальцы ведьмы» — [[сосиски в тесте|сосиска в тесте|saucisses en pâte feuilletée]] с миндалём вместо ногтей. А [[на десерт||pour le dessert]] — тыквенный [[пирог||tarte, gâteau]] и клюквенный [[морс||boisson aux baies (fruits rouges)]].",
+        "В семь часов [[пришли|прийти|arriver, venir]] друзья. Все были в [[костюмах|костюм|déguisement]]: Аня [[нарядилась|нарядиться в + accusatif|se déguiser en]] в [[ведьму|ведьма|sorcière]], Саша — в [[привидение||fantôme]], а Дима — в [[вампира|вампир|vampire]]. [[«Приятного аппетита!»|Приятного аппетита!|Bon appétit !]] — сказала Лиза. Суп всем очень понравился. Дима [[попробовал|попробовать|goûter]] винегрет и сказал: «Для вампира — идеальный салат!» Аня [[съела|съесть|manger (en entier)]] три пирожка, а Саша — пять «пальцев ведьмы».",
+        "[[Вдруг||soudain]] кто-то [[постучал|постучать|frapper (à la porte)]] в дверь. У всех [[душа ушла в пятки||ils ont eu une peur bleue (litt. « l'âme est descendue dans les talons »)]]! Максим медленно [[подошёл|подойти|s'approcher]] к двери и открыл её. На пороге стояли соседские дети в костюмах тыкв: [[«Сладость или гадость?»|Сладость или гадость?|« Des bonbons ou un sort ! »]] Лиза дала детям [[конфеты|конфета|bonbon]]. Потом [[зашла|зайти|passer (chez quelqu'un)]] и сама соседка — с [[пельменями|пельмени|raviolis russes à la viande]], которые она [[слепила|лепить / слепить|façonner (à la main)]] сама. «Это блюдо не страшное, — улыбнулась она, — зато очень [[вкусное|вкусный|bon, délicieux]]».",
+        "Друзья [[ушли|уйти|partir, s'en aller]] поздно, в час ночи. «Спасибо, всё было очень вкусно! — сказал Дима. — Я так [[наелся|наесться|manger à sa faim, être rassasié]], что не могу встать». А Лиза подумала: «Как хорошо, что мы переехали сюда! Соседи очень приятные»."
+    ];
+
+    var SAY_ICON = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M11 5 6 9H3v6h3l5 4z\" fill=\"currentColor\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7\"/><path d=\"M18.5 5.5a9 9 0 0 1 0 13\"/></svg>";
+
+    function richText(s){
+        var out = "", re = /\[\[([^|\]]+)\|([^|\]]*)\|([^\]]+)\]\]/g, last = 0, m;
+        while ((m = re.exec(s))){
+            out += esc(s.slice(last, m.index));
+            var base = m[2] || m[1];
+            out += "<button class=\"w\" type=\"button\" data-base=\"" + esc(base) + "\" data-fr=\"" + esc(m[3]) + "\">" + esc(m[1]) + "</button>";
+            last = re.lastIndex;
+        }
+        return out + esc(s.slice(last));
+    }
+    function plain(s){ return s.replace(/\[\[([^|\]]+)\|[^|\]]*\|[^\]]+\]\]/g, "$1"); }
+
+    // ---------- Synthèse vocale ----------
+    function canSpeak(){ return "speechSynthesis" in window && typeof SpeechSynthesisUtterance === "function"; }
+    function ruVoice(){ try { return speechSynthesis.getVoices().filter(function(v){ return /^ru/i.test(v.lang); })[0]; } catch(e){ return null; } }
+    function speak(t){
+        if (!canSpeak()) return;
+        try {
+            speechSynthesis.cancel();
+            var u = new SpeechSynthesisUtterance(t); u.lang = "ru-RU"; u.rate = 0.9;
+            var v = ruVoice(); if (v) u.voice = v;
+            speechSynthesis.speak(u);
+        } catch(e){}
+    }
+
+    // ---------- Rendu du texte ----------
+    (function(){
+        var h = "<h3>Страшно вкусный Хеллоуин</h3>";
+        TEXT.forEach(function(p, i){
+            h += "<p>" + richText(p) + "</p>";
+        });
+        $("story").innerHTML = h;
+    })();
+
+    // Bulle de traduction
+    var gloss = null, glossFor = null;
+    function closeGloss(){ if (gloss){ gloss.remove(); gloss = null; } if (glossFor){ glossFor.classList.remove("on"); glossFor = null; } }
+    document.addEventListener("click", function(e){
+        var w = e.target.closest(".w");
+        if (!w){ if (!e.target.closest(".gloss")) closeGloss(); return; }
+        if (glossFor === w){ closeGloss(); return; }
+        closeGloss();
+        glossFor = w; w.classList.add("on");
+        gloss = document.createElement("div"); gloss.className = "gloss"; gloss.setAttribute("role", "tooltip");
+        gloss.innerHTML = "<b>" + esc(w.getAttribute("data-base")) + "</b>" + esc(w.getAttribute("data-fr"));
+        document.body.appendChild(gloss);
+        var r = w.getBoundingClientRect(), gw = gloss.offsetWidth;
+        var left = Math.min(Math.max(16, r.left + window.scrollX), window.scrollX + document.documentElement.clientWidth - gw - 16);
+        gloss.style.left = left + "px"; gloss.style.top = (r.bottom + window.scrollY + 6) + "px";
+    });
+    document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeGloss(); });
+
+    // ---------- QCM générique ----------
+    function mcq(container, items, scoreEl){
+        var answered = 0, good = 0;
+        container.innerHTML = items.map(function(q, i){
+            var opts = shuffle(q.o.map(function(t, k){ return {t:t, ok:k === 0}; }));
+            q._opts = opts;
+            return "<div class=\"q\"><div class=\"stem\">" + (i + 1) + ". " + esc(q.q) + "</div><div class=\"opts\">" +
+                opts.map(function(o, k){ return "<button class=\"opt\" type=\"button\" data-q=\"" + i + "\" data-k=\"" + k + "\">" + esc(o.t) + "</button>"; }).join("") +
+                "</div><div class=\"fbslot\"></div></div>";
+        }).join("");
+        function upd(){ if (scoreEl) scoreEl.textContent = answered ? "Score : " + good + " / " + answered + (answered === items.length ? " — terminé" : "") : ""; }
+        container.addEventListener("click", function(e){
+            var b = e.target.closest(".opt"); if (!b || b.disabled) return;
+            var q = items[+b.getAttribute("data-q")], o = q._opts[+b.getAttribute("data-k")];
+            var box = b.closest(".q");
+            box.querySelectorAll(".opt").forEach(function(x, k){ x.disabled = true; if (q._opts[k].ok) x.classList.add("ok"); });
+            if (!o.ok) b.classList.add("bad");
+            answered++; if (o.ok) good++;
+            box.querySelector(".fbslot").innerHTML = "<div class=\"fb " + (o.ok ? "ok" : "bad") + "\"><div><span class=\"v\">" + (o.ok ? "Exact ! " : "Pas tout à fait. ") + "</span>🇫🇷 " + esc(q.fr) + "</div><div class=\"en\">🇬🇧 " + esc(q.en) + "</div></div>";
+            upd();
+        });
+        upd();
+    }
+
+    // Première option = bonne réponse (mélangées à l'affichage)
+    mcq($("comp"), [
+        {q:"Что ребята купили на рынке?", o:["Тыкву, свёклу, капусту и клюкву","Мясо и рыбу","Хлеб, сыр и колбасу","Только конфеты"],
+            fr:"« Купили огромную тыкву, свёклу, капусту, картошку, свежий творог и клюкву. »", en:"They bought a pumpkin, beetroot, cabbage, potatoes, cottage cheese and cranberries."},
+        {q:"Что Лиза приготовила на первое?", o:["Тыквенный суп","Борщ","Пельмени","Винегрет"],
+            fr:"« На первое Лиза сварила тыквенный суп. » На первое = le premier plat, souvent la soupe.", en:"The first course was pumpkin soup. На первое means the first course."},
+        {q:"Почему винегрет был «страшный»?", o:["Он был тёмно-красный, как кровь","Он был очень острый","Он был холодный","В нём были пауки"],
+            fr:"La betterave rend la salade rouge foncé, « comme du sang ».", en:"The beetroot made the salad dark red, like blood."},
+        {q:"Что такое «пальцы ведьмы»?", o:["Сосиски в тесте","Пирожки с капустой","Блины","Печенье"],
+            fr:"« Пальцы ведьмы » = des saucisses en pâte, avec des amandes pour les ongles.", en:"Witch's fingers are sausages in pastry with almonds as nails."},
+        {q:"Сколько пирожков съела Аня?", o:["Три","Пять","Два","Ни одного"],
+            fr:"« Аня съела три пирожка. » Après 2, 3, 4 : génitif singulier (пирожка).", en:"Anya ate three. After 2, 3, 4 Russian uses the genitive singular."},
+        {q:"Что принесла соседка?", o:["Пельмени","Тыквенный пирог","Конфеты","Морс"],
+            fr:"Elle a apporté des пельмени qu'elle a faits elle-même (слепила).", en:"She brought home-made pelmeni."},
+        {q:"Что было на десерт?", o:["Тыквенный пирог и клюквенный морс","Торт и чай","Блины со сметаной","Мороженое"],
+            fr:"« На десерт — тыквенный пирог и клюквенный морс. »", en:"Dessert was pumpkin pie and cranberry mors."}
+    ], $("compScore"));
+
+    // ---------- Normalisation ----------
+    function normW(s){ return s.toLowerCase().replace(/ё/g, "е").replace(/[́̀]/g, "").replace(/\s+/g, " ").trim(); }
+    function normP(s){ return normW(s).replace(/[.,!?;:«»"“”„()…]/g, " ").replace(/[—–]/g, " ").replace(/\s+/g, " ").trim(); }
+
+    // ---------- 2 · Mots ----------
+    var WORDS = [
+        // plats et nourriture
+        ["блюдо","plat","k"],["суп","soupe","k"],["борщ","bortsch","k"],["пельмени","raviolis russes (pelmeni)","k"],
+        ["блины","crêpes","k"],["пирог","tarte, gâteau","k"],["пирожок","petit chausson farci","k"],["торт","gâteau (à la crème)","k"],
+        ["каша","bouillie (de céréales)","k"],["салат","salade","k"],["котлета","boulette de viande","k"],["сосиска","saucisse","k"],
+        ["хлеб","pain","k"],["сыр","fromage","k"],["творог","fromage blanc","k"],["сметана","crème fraîche","k"],
+        ["свёкла","betterave","k"],["капуста","chou","k"],["картошка","pommes de terre","k"],["морс","boisson aux fruits rouges","k"],
+        ["вкусный","bon, délicieux","k"],["сладкий","sucré","k"],["солёный","salé","k"],["острый","épicé","k"],
+        ["попробовать","goûter","k","perfectif"],["приготовить","préparer, cuisiner","k","perfectif"],["съесть","manger (en entier)","k","perfectif"],
+        // Halloween
+        ["тыква","citrouille","h"],["свеча","bougie","h"],["костюм","déguisement","h"],["ведьма","sorcière","h"],
+        ["привидение","fantôme","h"],["вампир","vampire","h"],["скелет","squelette","h"],["паук","araignée","h"],
+        ["паутина","toile d'araignée","h"],["летучая мышь","chauve-souris","h"],["конфеты","bonbons","h"],
+        ["страшный","effrayant","h"],["вдруг","soudain","h"],["украсить","décorer","h","perfectif"],
+        ["постучать","frapper (à la porte)","h","perfectif"],["нарядиться","se déguiser","h","perfectif"]
+    ].map(function(w){ return {ru:w[0], fr:w[1], th:w[2], asp:w[3] || ""}; });
+
+    var W = {theme:"all", count:12, list:[], i:0, g:0, b:0, hints:0, errs:[], state:"idle"};
+    function chips(el, opts, key){
+        el.innerHTML = opts.map(function(o){ return "<button class=\"chip\" type=\"button\" data-v=\"" + o[0] + "\" aria-pressed=\"" + (String(W[key]) === String(o[0])) + "\">" + esc(o[1]) + "</button>"; }).join("");
+        el.addEventListener("click", function(e){
+            var b = e.target.closest(".chip"); if (!b) return;
+            var v = b.getAttribute("data-v"); W[key] = key === "count" ? (v === "all" ? "all" : +v) : v;
+            el.querySelectorAll(".chip").forEach(function(c){ c.setAttribute("aria-pressed", c === b ? "true" : "false"); });
+        });
+    }
+    chips($("wTheme"), [["all","Tout"],["k","Еда · plats"],["h","Хеллоуин"]], "theme");
+    chips($("wCount"), [["12","12"],["20","20"],["all","Tous"]], "count");
+
+    function startWords(list){
+        var pool = list || WORDS.filter(function(w){ return W.theme === "all" || w.th === W.theme; });
+        pool = shuffle(pool);
+        if (!list && W.count !== "all") pool = pool.slice(0, W.count);
+        W.list = pool.map(function(w){ return {w:w}; });
+        W.i = 0; W.g = 0; W.b = 0; W.errs = [];
+        $("wSetup").hidden = true; $("wDone").hidden = true; $("wTrainer").hidden = false;
+        showWord();
+    }
+    function showWord(){
+        var it = W.list[W.i], w = it.w;
+        W.state = "ask"; W.hints = 0;
+        $("wPos").textContent = (W.i + 1) + " / " + W.list.length;
+        $("wG").textContent = W.g + " ✓"; $("wB").textContent = W.b + " ✗";
+        $("wBar").style.width = (W.i / W.list.length * 100) + "%";
+        $("wTag").textContent = (w.th === "k" ? "Еда" : "Хеллоуин") + (w.asp ? " · verbe " + w.asp : "");
+        $("wFr").textContent = w.fr;
+        var inp = $("wIn"); inp.value = ""; inp.className = "type"; inp.readOnly = false;
+        $("wFb").innerHTML = "";
+        $("wCheck").hidden = false; $("wHint").hidden = false; $("wSkip").hidden = false; $("wNext").hidden = true;
+        if (!matchMedia("(pointer:coarse)").matches) inp.focus();
+    }
+    function diffHtml(typed, target){
+        var t = typed.toLowerCase().replace(/ё/g,"е"), g = target.toLowerCase().replace(/ё/g,"е"), out = "";
+        for (var k = 0; k < Math.max(t.length, g.length); k++){
+            var c = typed.charAt(k);
+            if (k >= t.length) out += "<span class=\"m\">_</span>";
+            else if (t.charAt(k) === g.charAt(k)) out += esc(c);
+            else out += "<span class=\"x\">" + esc(c === " " ? "␣" : c) + "</span>";
+        }
+        return out;
+    }
+    function revealWord(ok, typed){
+        var w = W.list[W.i].w;
+        W.state = "shown";
+        var inp = $("wIn"); inp.readOnly = true; inp.classList.add(ok ? "ok" : "bad");
+        if (ok) W.g++; else { W.b++; W.errs.push(w); }
+        $("wG").textContent = W.g + " ✓"; $("wB").textContent = W.b + " ✗";
+        var h = "<div class=\"fb " + (ok ? "ok" : "bad") + "\">";
+        if (ok) h += "<div><span class=\"v\">Bravo !</span> <span class=\"answer\">" + esc(w.ru) + "</span></div>";
+        else {
+            if (typed) h += "<div><span class=\"label\">Vous avez écrit</span><div class=\"diff\">" + diffHtml(typed, w.ru) + "</div></div>";
+            h += "<div><span class=\"label\">Bonne réponse</span><div class=\"answer\">" + esc(w.ru) + "</div></div>";
+        }
+        $("wFb").innerHTML = h + "</div>";
+        $("wCheck").hidden = true; $("wHint").hidden = true; $("wSkip").hidden = true; $("wNext").hidden = false;
+        $("wNext").focus();
+    }
+    $("wStart").addEventListener("click", function(){ startWords(); });
+    $("wCheck").addEventListener("click", function(){
+        var v = $("wIn").value; if (!v.trim()) { $("wIn").focus(); return; }
+        var target = W.list[W.i].w.ru;
+        revealWord(normW(v) === normW(target) && W.hints < 2, v.trim());
+    });
+    $("wHint").addEventListener("click", function(){
+        var target = W.list[W.i].w.ru, inp = $("wIn"), v = inp.value, k = 0;
+        while (k < v.length && k < target.length && normW(v.charAt(k)) === normW(target.charAt(k))) k++;
+        if (k >= target.length) return;
+        inp.value = target.slice(0, k + 1); W.hints++;
+        $("wFb").innerHTML = "<div class=\"fb\" style=\"background:var(--plum-soft)\">Indice " + W.hints + (W.hints >= 2 ? " — avec 2 indices, le mot sera à revoir." : "") + "</div>";
+        inp.focus();
+    });
+    $("wSkip").addEventListener("click", function(){ revealWord(false, ""); });
+    $("wNext").addEventListener("click", nextWord);
+    $("wIn").addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); if (W.state === "ask") $("wCheck").click(); else nextWord(); } });
+    $("wNext").addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); nextWord(); } });
+    $("wQuit").addEventListener("click", function(){ $("wTrainer").hidden = true; $("wSetup").hidden = false; });
+    function nextWord(){
+        if (W.state !== "shown") return;
+        W.i++;
+        if (W.i < W.list.length) { showWord(); return; }
+        $("wBar").style.width = "100%";
+        $("wTrainer").hidden = true;
+        var pct = Math.round(W.g / W.list.length * 100);
+        var verdict = pct === 100 ? "Отлично ! Sans faute." : pct >= 75 ? "Très bien !" : pct >= 50 ? "Pas mal — on revoit les erreurs ?" : "Il faut s'entraîner encore un peu.";
+        var h = "<span class=\"label\">Résultat</span><div class=\"row\"><span class=\"big\">" + W.g + " / " + W.list.length + "</span><span style=\"font-weight:700;color:var(--muted)\">" + verdict + "</span></div><div class=\"row\">";
+        if (W.errs.length) h += "<button class=\"btn\" id=\"wRedo\" type=\"button\">Revoir mes erreurs (" + W.errs.length + ")</button>";
+        h += "<button class=\"btn ghost\" id=\"wAgain\" type=\"button\">Nouvelle série</button></div>";
+        if (W.errs.length) h += "<ul class=\"errs\">" + W.errs.map(function(w){ return "<li><b>" + esc(w.ru) + "</b><span>" + esc(w.fr) + "</span></li>"; }).join("") + "</ul>";
+        $("wDone").innerHTML = h; $("wDone").hidden = false;
+        var r = $("wRedo"); if (r) r.addEventListener("click", function(){ startWords(W.errs.slice()); });
+        $("wAgain").addEventListener("click", function(){ $("wDone").hidden = true; $("wSetup").hidden = false; });
+    }
+
+    // ---------- 3 · Phrases ----------
+    var PHRASES = [
+        {fr:"Bon appétit !", ru:["Приятного аппетита!"], tip:"Génitif : (Желаю) приятного аппетита."},
+        {fr:"C'est très bon !", ru:["Очень вкусно!","Это очень вкусно!"], tip:"вкусно : adverbe, pour dire que c'est bon en général."},
+        {fr:"Je peux goûter la soupe ?", ru:["Можно попробовать суп?","Можно мне попробовать суп?"], tip:"Можно + infinitif pour demander la permission."},
+        {fr:"En premier plat, il y a une soupe à la citrouille.", ru:["На первое тыквенный суп.","На первое — тыквенный суп.","На первое будет тыквенный суп.","На первое у нас тыквенный суп."], tip:"на первое / на второе / на десерт : l'ordre du repas russe."},
+        {fr:"Pour le dessert, j'ai fait une tarte à la citrouille.", ru:["На десерт я испекла тыквенный пирог.","На десерт я испёк тыквенный пирог.","Я испекла тыквенный пирог на десерт.","Я испёк тыквенный пирог на десерт."], tip:"Un gâteau « se fait » au four : испечь (passé : испёк, испекла)."},
+        {fr:"Ce plat est trop épicé pour moi.", ru:["Это блюдо слишком острое для меня.","Для меня это блюдо слишком острое."], tip:"блюдо est neutre → острое."},
+        {fr:"Tu veux encore un pirojok ?", ru:["Хочешь ещё пирожок?","Ты хочешь ещё пирожок?"], tip:"ещё = encore (en plus)."},
+        {fr:"Merci, tout était délicieux !", ru:["Спасибо, всё было очень вкусно!","Спасибо, всё было вкусно!","Спасибо, было очень вкусно!"], tip:"La phrase rituelle à la fin d'un repas."},
+        {fr:"Nous avons invité des amis à dîner.", ru:["Мы пригласили друзей на ужин."], tip:"пригласить на + accusatif : на ужин, на день рождения."},
+        {fr:"Soudain, quelqu'un a frappé à la porte.", ru:["Вдруг кто-то постучал в дверь."], tip:"постучать в + accusatif : в дверь, в окно."},
+        {fr:"En quoi tu te déguises pour Halloween ?", ru:["В кого ты нарядишься на Хеллоуин?","Кем ты будешь на Хеллоуин?","В кого ты наряжаешься на Хеллоуин?"], tip:"нарядиться в + accusatif (animé) : в ведьму, в вампира."},
+        {fr:"Les enfants des voisins sont passés chercher des bonbons.", ru:["Соседские дети зашли за конфетами.","Дети соседей зашли за конфетами."], tip:"зайти за + instrumental = passer chercher : зайти за хлебом."}
+    ];
+    var P = {list:[], i:0, g:0, b:0, state:"ask", errs:[]};
+    function startPhrases(list){
+        P.list = list || PHRASES.slice(); P.i = 0; P.g = 0; P.b = 0; P.errs = [];
+        $("pDone").hidden = true; $("pTrainer").hidden = false; showPhrase();
+    }
+    function showPhrase(){
+        var it = P.list[P.i]; P.state = "ask";
+        $("pPos").textContent = (P.i + 1) + " / " + P.list.length;
+        $("pG").textContent = P.g + " ✓"; $("pB").textContent = P.b + " ✗";
+        $("pBar").style.width = (P.i / P.list.length * 100) + "%";
+        $("pFr").textContent = it.fr;
+        var inp = $("pIn"); inp.value = ""; inp.className = "type"; inp.readOnly = false;
+        $("pFb").innerHTML = "";
+        ["pCheck","pSkip"].forEach(function(id){ $(id).hidden = false; });
+        ["pRight","pWrong","pNext"].forEach(function(id){ $(id).hidden = true; });
+    }
+    function phraseFb(cls, head, it){
+        var h = "<div class=\"fb " + cls + "\"><div><span class=\"v\">" + head + "</span></div>" +
+            "<div><span class=\"label\">Modèle</span><div class=\"answer\">" + esc(it.ru[0]) + "</div></div>";
+        if (it.ru.length > 1) h += "<div style=\"color:var(--muted)\">Aussi possible : " + it.ru.slice(1).map(esc).join(" · ") + "</div>";
+        h += "<div class=\"en\">💡 " + esc(it.tip) + "</div></div>";
+        $("pFb").innerHTML = h;
+    }
+    $("pCheck").addEventListener("click", function(){
+        var it = P.list[P.i], v = $("pIn").value;
+        if (!v.trim()){ $("pIn").focus(); return; }
+        $("pIn").readOnly = true;
+        var ok = it.ru.some(function(a){ return normP(a) === normP(v); });
+        $("pCheck").hidden = true; $("pSkip").hidden = true;
+        if (ok){ P.g++; P.state = "shown"; $("pIn").classList.add("ok"); phraseFb("ok", "Bravo, c'est exactement ça !", it); $("pNext").hidden = false; $("pG").textContent = P.g + " ✓"; $("pNext").focus(); }
+        else { P.state = "judge"; phraseFb("", "Comparez avec le modèle. Votre phrase est-elle juste ?", it); $("pFb").firstChild.style.background = "var(--plum-soft)"; $("pRight").hidden = false; $("pWrong").hidden = false; }
+    });
+    function judge(ok){
+        if (ok) P.g++; else { P.b++; P.errs.push(P.list[P.i]); }
+        $("pG").textContent = P.g + " ✓"; $("pB").textContent = P.b + " ✗";
+        $("pIn").classList.add(ok ? "ok" : "bad");
+        $("pRight").hidden = true; $("pWrong").hidden = true; $("pNext").hidden = false; P.state = "shown"; $("pNext").focus();
+    }
+    $("pRight").addEventListener("click", function(){ judge(true); });
+    $("pWrong").addEventListener("click", function(){ judge(false); });
+    $("pSkip").addEventListener("click", function(){
+        var it = P.list[P.i]; $("pIn").readOnly = true; P.b++; P.errs.push(it); P.state = "shown";
+        $("pB").textContent = P.b + " ✗"; phraseFb("bad", "Voici la réponse.", it);
+        $("pCheck").hidden = true; $("pSkip").hidden = true; $("pNext").hidden = false;
+    });
+    function nextPhrase(){
+        if (P.state !== "shown") return;
+        P.i++;
+        if (P.i < P.list.length){ showPhrase(); return; }
+        $("pTrainer").hidden = true;
+        var h = "<span class=\"label\">Résultat</span><div class=\"row\"><span class=\"big\">" + P.g + " / " + P.list.length + "</span></div><div class=\"row\">";
+        if (P.errs.length) h += "<button class=\"btn\" id=\"pRedo\" type=\"button\">Refaire les phrases à revoir (" + P.errs.length + ")</button>";
+        h += "<button class=\"btn ghost\" id=\"pAgain\" type=\"button\">Tout recommencer</button></div>";
+        $("pDone").innerHTML = h; $("pDone").hidden = false;
+        var r = $("pRedo"); if (r) r.addEventListener("click", function(){ startPhrases(P.errs.slice()); });
+        $("pAgain").addEventListener("click", function(){ startPhrases(); });
+    }
+    $("pNext").addEventListener("click", nextPhrase);
+    $("pNext").addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); nextPhrase(); } });
+    $("pIn").addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); if (P.state === "ask") $("pCheck").click(); else if (P.state === "shown") nextPhrase(); } });
+    $("pRestart").addEventListener("click", function(){ startPhrases(); });
+    startPhrases();
+
+    // ---------- 4 · Curiosités ----------
+    function cards(el, list, cls){
+        el.innerHTML = list.map(function(c){ return "<button class=\"card " + cls + "\" type=\"button\" aria-expanded=\"false\"><b>" + esc(c[0]) + "</b><span class=\"back\">" + esc(c[1]) + "</span></button>"; }).join("");
+        el.addEventListener("click", function(e){ var b = e.target.closest(".card"); if (b) b.setAttribute("aria-expanded", b.getAttribute("aria-expanded") === "true" ? "false" : "true"); });
+    }
+    cards($("cFear"), [
+        ["Душа ушла в пятки.","Avoir une peur bleue. Litt. « l'âme est descendue dans les talons »."],
+        ["Мурашки по коже.","Avoir la chair de poule. Litt. « des fourmis sur la peau »."],
+        ["Волосы встали дыбом.","Les cheveux se dressent sur la tête."],
+        ["Кровь стынет в жилах.","Ça glace le sang."]
+    ], "fear");
+    cards($("cFood"), [
+        ["не в своей тарелке","Pas dans son assiette — la même image qu'en français !"],
+        ["проще пареной репы","Simple comme bonjour. Litt. « plus simple qu'un navet cuit à la vapeur »."],
+        ["заварить кашу","Semer la pagaille, créer des ennuis. Litt. « préparer la bouillie »."],
+        ["вешать лапшу на уши","Raconter des salades. Litt. « accrocher des nouilles aux oreilles »."],
+        ["как сыр в масле кататься","Vivre comme un coq en pâte. Litt. « rouler comme du fromage dans le beurre »."]
+    ], "food");
+
+    mcq($("idq"), [
+        {q:"Это задание очень лёгкое — …", o:["проще пареной репы","не в своей тарелке","заварить кашу","кровь стынет в жилах"],
+            fr:"Une tâche très facile : проще пареной репы.", en:"Easy as pie: проще пареной репы."},
+        {q:"Не верь ему, он тебе …", o:["вешает лапшу на уши","заваривает кашу","катается как сыр в масле","проще пареной репы"],
+            fr:"Il te raconte des salades : вешает лапшу на уши.", en:"He's pulling your leg: вешает лапшу на уши."},
+        {q:"После переезда я первую неделю был …: всё новое, никого не знаю.", o:["не в своей тарелке","как сыр в масле","проще пареной репы","душа в пятках"],
+            fr:"Pas dans son assiette — exactement comme en français.", en:"Feeling out of sorts: не в своей тарелке."},
+        {q:"Фильм был такой страшный, что у меня …", o:["мурашки по коже","лапша на ушах","каша в тарелке","сыр в масле"],
+            fr:"La chair de poule : мурашки по коже.", en:"Goosebumps: мурашки по коже."},
+        {q:"У них большой дом и хорошая работа — они живут …", o:["как сыр в масле","не в своей тарелке","с лапшой на ушах","с душой в пятках"],
+            fr:"Ils vivent comme des coqs en pâte : как сыр в масле.", en:"They live in clover: как сыр в масле."}
+    ], null);
+
+    // ---------- Navigation ----------
+    var VIEWS = ["lecture","mots","phrases","curiosites"];
+    function route(){
+        var v = (location.hash || "").slice(1); if (VIEWS.indexOf(v) < 0) v = "lecture";
+        closeGloss();
+        VIEWS.forEach(function(x){ $("v-" + x).hidden = x !== v; });
+        document.querySelectorAll("#nav a").forEach(function(a){ if (a.getAttribute("data-v") === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    }
+    window.addEventListener("hashchange", function(){ route(); var n = $("nav"); if (n.getBoundingClientRect().top < 0) n.scrollIntoView(); });
+    route();
+</script>
+
+</body>
+</html>
